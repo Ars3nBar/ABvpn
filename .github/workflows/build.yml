@@ -1,4 +1,4 @@
-name: Build ABvpn
+name: Build ABvpn v2.0
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -24,11 +24,11 @@ jobs:
       - name: Build Linux tar.gz
         run: |
           flet pack main.py --name ABvpn
-          tar -czvf ABvpn-linux-x86_64.tar.gz -C dist ABvpn
+          tar -czvf ABvpn-v2.0-linux-x86_64.tar.gz -C dist ABvpn
       - uses: actions/upload-artifact@v4
         with:
           name: linux-tar-gz
-          path: ABvpn-linux-x86_64.tar.gz
+          path: ABvpn-v2.0-linux-x86_64.tar.gz
 
   build-windows:
     runs-on: windows-latest
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Install dependencies
         run: |
           pip install -r requirements.txt pyinstaller
@@ -54,19 +54,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          python-version: '3.12'
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Build Android APK
+      - name: Accept Android Licenses & Build APK
         run: |
-          pip install -r requirements.txt
-          flet build apk --project ABvpn
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          pip install flet-cli flet requests
+          flet build apk --project ABvpn --product "ABvpn 2.0" --org "com.abvpn.app" --yes
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
@@ -82,9 +79,9 @@ jobs:
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: ABvpn v1.0.${{ github.run_number }}
+          tag_name: v2.0.${{ github.run_number }}
+          name: ABvpn v2.0.${{ github.run_number }}
           files: |
-            artifacts/linux-tar-gz/ABvpn-linux-x86_64.tar.gz
+            artifacts/linux-tar-gz/ABvpn-v2.0-linux-x86_64.tar.gz
             artifacts/windows-exe/ABvpn.exe
             artifacts/android-apk/*.apk
