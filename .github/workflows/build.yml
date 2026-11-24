@@ -16,15 +16,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install dependencies
+      - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libmpv-dev libgtk-3-dev
-          pip install -r requirements.txt pyinstaller
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libmpv-dev
+          pip install flet==0.28.3 flet-cli==0.28.3 requests
       - name: Build Linux tar.gz
         run: |
-          flet pack main.py --name ABvpn
-          tar -czvf ABvpn-v2.0-linux-x86_64.tar.gz -C dist ABvpn
+          flet build linux --yes
+          tar -czvf ABvpn-v2.0-linux-x86_64.tar.gz -C build/linux .
       - uses: actions/upload-artifact@v4
         with:
           name: linux-tar-gz
@@ -39,14 +39,14 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt pyinstaller
+          pip install flet==0.28.3 flet-cli==0.28.3 requests
       - name: Build Windows exe
         run: |
-          flet pack main.py --name ABvpn
+          flet build windows --yes
       - uses: actions/upload-artifact@v4
         with:
           name: windows-exe
-          path: dist/ABvpn.exe
+          path: build/windows/ABvpn.exe
 
   build-android:
     runs-on: ubuntu-latest
@@ -59,11 +59,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Accept Android Licenses & Build APK
+      - name: Build Android APK
         run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          pip install flet-cli flet requests
-          flet build apk --project ABvpn --product "ABvpn 2.0" --org "com.abvpn.app" --yes
+          pip install flet==0.28.3 flet-cli==0.28.3 requests
+          flet build apk --yes --verbose
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
