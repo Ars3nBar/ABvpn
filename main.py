@@ -11,7 +11,7 @@ SOURCES = [
     "https://raw.githubusercontent.com/ebbiner/V2ray-configs/main/V2ray_configs.txt",
 ]
 
-TG_URL = "https://t.me/Ars3nBar_osn"
+TG_URL = "https://t.me/Ars3nbar_osn"
 TT_URL = "https://www.tiktok.com/@ars3nbar"
 
 THEMES = {
@@ -65,10 +65,8 @@ def main(page: ft.Page):
     page.window.width = 440
     page.window.height = 760
     page.padding = 18
-    page.fonts = {"Mono": "monospace"}
 
-    # --- CORE REACTOR BUTTON ---
-    core_icon = ft.Icon(ft.Icons.POLI_ROUNDED, color=th["primary"], size=46)
+    core_icon = ft.Icon(ft.Icons.SHIELD_MOON_ROUNDED, color=th["primary"], size=46)
     core_label = ft.Text("SCAN", size=11, weight=ft.FontWeight.BOLD, color="#F8FAFC")
 
     inner_core = ft.Container(
@@ -136,7 +134,7 @@ def main(page: ft.Page):
     )
 
     active_card = ft.Container(
-        content=ft.Column([active_title, active_sub copy_btn], spacing=8),
+        content=ft.Column([active_title, active_sub, copy_btn], spacing=8),
         padding=14,
         border_radius=16,
         bgcolor=th["card"],
@@ -178,7 +176,7 @@ def main(page: ft.Page):
                                 ),
                                 ft.Column(
                                     [
-                                        ft.Text(remark, size=13, weight=ft.FontWeight.V600, color="#F1F5F9"),
+                                        ft.Text(remark, size=13, weight=ft.FontWeight.W600, color="#F1F5F9"),
                                         ft.Text(f"{host}:{port}", size=11, color="#64748B"),
                                     ],
                                     spacing=1,
@@ -187,7 +185,7 @@ def main(page: ft.Page):
                             spacing=10,
                         ),
                         ft.Text(f"{ping} ms", size=12, weight=ft.FontWeight.BOLD, color=p_color),
-                     ],
+                    ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
                 padding=11,
@@ -266,126 +264,5 @@ def main(page: ft.Page):
         spacing=6,
     )
 
-    # --- TAB 2: CUSTOM IP TESTER ---
     ip_input = ft.TextField(label="IP-адрес или домен", hint_text="185.220.101.1", border_radius=12)
-    port_input = ft.TextField(label="Порт", value="443", width=100, border_radius=12)
-    custom_result = ft.Text("Введите IP с сайта для проверки порта", size=13, color="#94A3B8")
-
-    def test_custom_ip(e):
-        h = ip_input.value.strip()
-        try:
-            p = int(port_input.value.strip())
-        except ValueError:
-            custom_result.value = "Укажите корректный порт"
-            page.update()
-            return
-        if not h:
-            return
-        custom_result.value = "Проверяем пинг до {h}:{p}..."
-        page.update()
-        msg = check_ping(h, p)
-        if msg is not None:
-            custom_result.value = f"Узел открыт! Пинг: {msg} мс"
-            custom_result.color = "#34D399"
-        else:
-            custom_result.value = "Порт закрыт или сервер недоступен"
-            custom_result.color = "#F87171"
-        page.update()
-
-    custom_view = ft.Column(
-        [
-            ft.Text("Проверка своего IP / Прокси", size=18, weight=ft.FontWeight.BOLD),
-            ft.Row([ip_input, port_input]),
-            ft.FilledButton("Проверить пинг усла", icon=ft.Icons.SPEED, onOk=none, on_click=test_custom_ip),
-            custom_result,
-        ],
-        spacing=14,
-        visible=False,
-    )
-
-    # --- TAB 3: CUSTOMIZATION ---
-    def apply_theme(t_name):
-        state["theme"] = t_name
-        c = THEMES[t_name]
-        page.bgcolor = c["bg"]
-        inner_core.bgcolor = c["card"]
-        inner_core.border = ft.border.all(2, c["primary"])
-        inner_core.shadow = ft.BoxShadow(blur_radius=28, color=c["primary"] + "55")
-        core_icon.color = c["primary"]
-        outer_ring.border = ft.border.all(1.5, c["secondary"] + "66")
-        active_card.bgcolor = c["card"]
-        copy_btn.gradient = ft.LinearGradient(colors=[c["primary"], c["secondary"]])
-        render_nodes()
-
-    theme_view = ft.Column(
-        [
-            ft.Text("Кастомизация Abvpn", size=18, weight=ft.FontWeight.BOLD),
-            ft.Text("Выберите неоновую подветку интерфейса:", size=13, color="#94A3B8"),
-            ft.Column(
-                [
-                    ft.ListTile(
-                        leading=ft.Container(width=24, height=24, border_radius=12, bgcolor=t_data["primary"]),
-                        title=ft.Text(t_name),
-                        on_click=lambda _, name=t_name: apply_theme(name),
-                    )
-                    for t_name, t_data in THEMES.items()
-                ]
-            ),
-        ],
-        spacing=12,
-        visible=False,
-    )
-
-    radar_view = ft.Column(
-        [
-            ft.Container(content=outer_ring, alignment=ft.alignment.center),
-            status_badge,
-            filter_row,
-            active_card,
-            servers_list,
-        ],
-        expand=True,
-        spacing=10,
-    )
-
-    def on_nav_change(e):
-        idx = e.control.selected_index
-        radar_view.visible = (idx == 0)
-        custom_view.visible = (idx == 1)
-        theme_view.visible = (idx == 2)
-        page.update()
-
-    page.navigation_bar = ft.NavigationBar(
-        bgcolor="#0B102A",
-        on_change=on_nav_change,
-        destinations=[
-            ft.NavigationBarDestination(icon=ft.Icons.RADAR_ROUNDED, label="База IP", elevation=0),
-            ft.NavigationBarDestination(icon=ft.Icons.TUNE_ROUNDED, label="Свой IP"),
-            ft.NavigationBarDestination(icon=ft.Icons.PALETTE_ROUNDED, label="Темы"),
-        ],
-    )
-
-    header = ft.Row(
-        [
-            ft.Row(
-                [
-                    ft.Icon(ft.Icons.SHIELD_MOON_ROUNDED, color=th["primary"], size=26),
-                    ft.Text("ABvpn v2.0", size=22, weight=ft.FontWeight.BOLD, color="#F8FAFC"),
-                ],
-                spacing=8,
-            ),
-            ft.Row(
-                [
-                    ft.IconButton(ft.Icons.TELEGRAM, icon_color="#38BDF8", tooltip="Telegram", on_click=lambda _: page.launch_url(TG_URL))),
-                    ft.IconButton(ft.Icons.MUSIC_NOTE_ROUNDED, icon_color="#F43F5E", tooltip="TikTok", on_click=lambda _: page.launch_url(TT_URL)),
-                ],
-                spacing=0,
-            ),
-        ],
-        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-    )
-
-    page.add(header, radar_view, custom_view, theme_view)
-
-if __name__ == "__main__":
-    ft.app(target=main)
+    port_input = ft.TextField(label="П
